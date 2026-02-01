@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Retro Arcade Universe</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f91fb1",
+                        "background-light": "#f8f5f7",
+                        "background-dark": "#230f1c",
+                        "cabinet-dark": "#1a0b15",
+                        "cabinet-panel": "#2d2d2d",
+                        "arcade-black": "#0a0a0a",
+                        "arcade-screen": "#1a1a2e",
+                        "accent-green": "#00ff9d",
+                        "accent-orange": "#ff9e00",
+                        "surface-dark": "#35182b",
+                        "surface-darker": "#1a0b15",
+                        "neon-blue": "#00f0ff",
+                        "neon-yellow": "#fee801",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    backgroundImage: {
+                        'scanlines': 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
+                        'carbon': 'radial-gradient(black 15%, transparent 16%) 0 0, radial-gradient(black 15%, transparent 16%) 8px 8px, radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px, radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px',
+                        'grid-pattern': "linear-gradient(to right, #4a213c 1px, transparent 1px), linear-gradient(to bottom, #4a213c 1px, transparent 1px)",
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px theme("colors.primary"), 0 0 20px theme("colors.primary")',
+                        'screen': 'inset 0 0 40px rgba(0,0,0,0.8)',
+                        'button': '0 6px 0 rgb(0,0,0, 0.6), 0 10px 10px rgba(0,0,0,0.5)',
+                        'button-pressed': '0 2px 0 rgb(0,0,0, 0.6), inset 0 2px 5px rgba(0,0,0,0.3)',
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "1.5rem", "xl": "2rem", "2xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        /* Common Styles */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #230f1c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a213c;
+            border-radius: 99px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f91fb1;
+        }
+
+        /* Navigation Button Active State */
+        .nav-btn.active {
+            color: #f91fb1;
+            border-bottom-color: #f91fb1;
+            background-color: rgba(249, 31, 177, 0.1);
+        }
+
+        /* --- Arcade Cabinet Styles --- */
+        .arcade-btn {
+            transition: all 0.1s;
+        }
+
+        .arcade-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgb(0, 0, 0, 0.6), inset 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .bg-scanlines {
+            background-size: 100% 3px, 3px 100%;
+        }
+
+        .bg-carbon {
+            background-color: #282828;
+            background-size: 16px 16px;
+        }
+
+        /* --- Level Select & Upgrade Shop Styles --- */
+        .scanlines {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .screen-glow {
+            box-shadow: 0 0 20px rgba(249, 31, 177, 0.15);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px rgba(249, 31, 177, 0.7);
+        }
+
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(249, 31, 177, 0.4);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-bar-fill {
+            transition: width 1s ease-out;
+        }
+
+        /* --- Retro Strike Styles --- */
+        .arcade-glow {
+            text-shadow: 0 0 10px #f91fb1, 0 0 20px #f91fb1, 0 0 30px #f91fb1;
+        }
+
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .perspective-grid {
+            transform: perspective(100vh) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            background-image: linear-gradient(to right, rgba(249, 31, 177, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(249, 31, 177, 0.3) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .pulse-btn {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(249, 31, 177, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(249, 31, 177, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(249, 31, 177, 0);
+            }
+        }
+
+        .glitch-text {
+            position: relative;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -1px 0 #00f0ff;
+            clip-path: inset(20% 0 30% 0);
+            animation: noise-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -1px 0 #fee801;
+            clip-path: inset(60% 0 10% 0);
+            animation: noise-anim 2s infinite linear alternate-reverse;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.97;
+            }
+
+            5% {
+                opacity: 0.95;
+            }
+
+            10% {
+                opacity: 0.9;
+            }
+
+            15% {
+                opacity: 0.95;
+            }
+
+            20% {
+                opacity: 0.99;
+            }
+
+            25% {
+                opacity: 0.95;
+            }
+
+            30% {
+                opacity: 0.9;
+            }
+
+            35% {
+                opacity: 0.96;
+            }
+
+            40% {
+                opacity: 0.98;
+            }
+
+            45% {
+                opacity: 0.95;
+            }
+
+            50% {
+                opacity: 0.99;
+            }
+
+            55% {
+                opacity: 0.93;
+            }
+
+            60% {
+                opacity: 0.9;
+            }
+
+            65% {
+                opacity: 0.96;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            75% {
+                opacity: 0.97;
+            }
+
+            80% {
+                opacity: 0.95;
+            }
+
+            85% {
+                opacity: 0.92;
+            }
+
+            90% {
+                opacity: 0.96;
+            }
+
+            95% {
+                opacity: 0.99;
+            }
+
+            100% {
+                opacity: 0.94;
+            }
+        }
+
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes noise-anim {
+            0% {
+                clip-path: inset(80% 0 1% 0);
+            }
+
+            20% {
+                clip-path: inset(10% 0 85% 0);
+            }
+
+            40% {
+                clip-path: inset(40% 0 45% 0);
+            }
+
+            60% {
+                clip-path: inset(80% 0 5% 0);
+            }
+
+            80% {
+                clip-path: inset(20% 0 60% 0);
+            }
+
+            100% {
+                clip-path: inset(15% 0 70% 0);
+            }
+        }
+
+        @keyframes noise-anim-2 {
+            0% {
+                clip-path: inset(15% 0 70% 0);
+            }
+
+            20% {
+                clip-path: inset(80% 0 5% 0);
+            }
+
+            40% {
+                clip-path: inset(40% 0 45% 0);
+            }
+
+            60% {
+                clip-path: inset(10% 0 85% 0);
+            }
+
+            80% {
+                clip-path: inset(80% 0 1% 0);
+            }
+
+            100% {
+                clip-path: inset(20% 0 60% 0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display overflow-hidden h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav
+        class="shrink-0 flex items-center justify-between px-6 py-3 bg-black/90 border-b border-primary/20 backdrop-blur-md z-[100] relative">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-2xl animate-pulse">stadia_controller</span>
+            <span class="font-bold tracking-widest text-sm hidden md:inline">RETRO ARCADE OS</span>
+        </div>
+        <div class="flex items-center gap-2 md:gap-6 overflow-x-auto">
+            <button onclick="switchView('landing')" id="btn-landing"
+                class="nav-btn px-3 py-2 text-xs md:text-sm font-bold text-white/70 hover:text-primary transition-all border-b-2 border-transparent uppercase tracking-wider whitespace-nowrap">Home</button>
+            <button onclick="switchView('cabinet')" id="btn-cabinet"
+                class="nav-btn px-3 py-2 text-xs md:text-sm font-bold text-white/70 hover:text-primary transition-all border-b-2 border-transparent uppercase tracking-wider whitespace-nowrap">Cabinet</button>
+            <button onclick="switchView('levels')" id="btn-levels"
+                class="nav-btn px-3 py-2 text-xs md:text-sm font-bold text-white/70 hover:text-primary transition-all border-b-2 border-transparent uppercase tracking-wider whitespace-nowrap">Levels</button>
+            <button onclick="switchView('shop')" id="btn-shop"
+                class="nav-btn px-3 py-2 text-xs md:text-sm font-bold text-white/70 hover:text-primary transition-all border-b-2 border-transparent uppercase tracking-wider whitespace-nowrap">Upgrade
+                Shop</button>
+        </div>
+        <div class="hidden md:flex items-center gap-2 text-xs font-mono text-white/50">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            ONLINE
+        </div>
+    </nav>
+
+    <!-- View Container -->
+    <div id="app-container" class="flex-1 overflow-y-auto relative bg-[#1a0b15] w-full">
+
+        <!-- View: Landing (Retro Strike) -->
+        <section id="view-landing" class="view-section min-h-full w-full flex flex-col hidden">
+            <!-- Landing Page Content -->
+            <div class="absolute inset-0 z-0 crt-overlay opacity-20 pointer-events-none w-full h-full"></div>
+            <!-- Navigation (Inner) -->
+            <header
+                class="w-full px-6 py-4 flex items-center justify-between border-b border-primary/20 bg-background-dark/80 backdrop-blur-sm z-10">
+                <div class="flex items-center gap-3">
+                    <div class="size-8 text-primary animate-pulse">
+                        <span class="material-symbols-outlined text-3xl">sports_esports</span>
+                    </div>
+                    <h2 class="text-white text-xl font-bold tracking-widest uppercase hidden md:block"
+                        style="text-shadow: 2px 2px 0px #f91fb1;">Retro Strike</h2>
+                </div>
+                <nav class="hidden md:flex items-center gap-8">
+                    <a class="text-white/80 hover:text-primary hover:shadow-[0_0_10px_#f91fb1] transition-all text-sm font-medium tracking-widest uppercase px-2 py-1"
+                        href="#">Start</a>
+                    <a class="text-white/80 hover:text-primary hover:shadow-[0_0_10px_#f91fb1] transition-all text-sm font-medium tracking-widest uppercase px-2 py-1"
+                        href="#">Levels</a>
+                    <a class="text-white/80 hover:text-primary hover:shadow-[0_0_10px_#f91fb1] transition-all text-sm font-medium tracking-widest uppercase px-2 py-1"
+                        href="#">Top Scores</a>
+                </nav>
+                <div class="flex items-center gap-4">
+                    <span class="text-neon-yellow text-xs font-mono hidden lg:block animate-pulse">CREDITS: 00</span>
+                    <button
+                        class="flex items-center justify-center rounded-full h-9 px-6 bg-primary/20 border border-primary text-primary text-sm font-bold tracking-wider hover:bg-primary hover:text-white transition-colors">LOGIN</button>
+                </div>
+            </header>
+            <!-- Main Content -->
+            <main
+                class="relative flex-grow flex flex-col items-center justify-center w-full overflow-hidden pt-10 pb-20 z-10 w-full">
+                <!-- Background Grid Effect -->
+                <div class="absolute inset-0 z-0 bg-[#1a0b15]">
+                    <div
+                        class="absolute bottom-1/2 left-1/2 -translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-t from-primary/40 to-transparent blur-[80px]">
+                    </div>
+                    <div class="absolute inset-0 top-[40%] perspective-grid opacity-40"></div>
+                    <div class="absolute inset-0 bg-[url('https://placeholder.pics/svg/20')] opacity-20 mix-blend-screen"
+                        data-alt="starfield pattern noise"></div>
+                </div>
+                <!-- Hero Container -->
+                <div
+                    class="relative z-10 container mx-auto px-4 flex flex-col items-center justify-center min-h-[60vh] text-center">
+                    <div class="mb-12 space-y-4">
+                        <div
+                            class="inline-block px-4 py-1 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md mb-6">
+                            <span class="text-primary text-xs font-mono tracking-[0.2em] uppercase">System Ready //
+                                Insert Coin</span>
+                        </div>
+                        <h1 class="glitch-text text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-white italic transform -skew-x-6"
+                            data-text="RETRO STRIKE">RETRO STRIKE</h1>
+                        <p class="text-lg md:text-2xl text-white/80 font-light tracking-wide max-w-2xl mx-auto mt-4"
+                            style="text-shadow: 0 0 10px rgba(255,255,255,0.3);">
+                            The Galaxy Needs Saving. <span class="text-neon-blue font-bold">1-Bit</span> at a Time.
+                        </p>
+                    </div>
+                    <!-- CTA Section -->
+                    <div class="flex flex-col items-center gap-6">
+                        <button onclick="switchView('levels')"
+                            class="pulse-btn group relative flex items-center justify-center overflow-hidden rounded-full h-16 px-12 bg-primary text-white text-xl font-black tracking-[0.1em] transition-transform active:scale-95 border-b-4 border-b-[#a60b72] active:border-b-0 active:translate-y-1">
+                            <span
+                                class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                            <span class="relative flex items-center gap-3">
+                                <span class="material-symbols-outlined animate-pulse">play_circle</span>
+                                START GAME
+                            </span>
+                        </button>
+                    </div>
+                    <!-- Game Mode Cards -->
+                    <div
+                        class="mt-20 w-full grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl opacity-80 hover:opacity-100 transition-opacity duration-500">
+                        <div
+                            class="group relative overflow-hidden rounded-xl border border-primary/30 bg-background-dark/50 p-4 hover:border-primary transition-colors cursor-pointer">
+                            <div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                            </div>
+                            <div class="relative h-40 rounded-lg bg-black mb-4 overflow-hidden border border-white/10">
+                                <div class="w-full h-full bg-cover bg-center opacity-70 group-hover:scale-110 transition-transform duration-700"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCJEpaK4O7iGRpKL0bAgbQdMySm15g-t4pWEVd5AR6h4i1ZtQjc783o1nGD_cYcMqSIOZKQP5722NGVKJ3EbTGKR2bqWzBittZ7GSh4VLgFnxHfW9uMlwZ5Pt1lv0hbEQmnIOVpLzXU-szSggucWWA23hjumOOzUu42X1UtQy_NlFGl6xDGgZYaVE3Pp8wJdtlm9YZL18SXmIuu2UJhdk5ytvmsr8zz9njEcyYuWvql3dwIAlbI3k6h2zxiqAaCXaXIlPb_6HwbRCQ');">
+                                </div>
+                            </div>
+                            <h3 class="text-white font-bold text-lg mb-1 group-hover:text-neon-blue transition-colors">
+                                NEON CITY</h3>
+                        </div>
+                        <div
+                            class="group relative overflow-hidden rounded-xl border border-primary/30 bg-background-dark/50 p-4 hover:border-primary transition-colors cursor-pointer">
+                            <div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                            </div>
+                            <div class="relative h-40 rounded-lg bg-black mb-4 overflow-hidden border border-white/10">
+                                <div class="w-full h-full bg-cover bg-center opacity-70 group-hover:scale-110 transition-transform duration-700"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCEfhAXBku1lsMMLoGag3PJenP_peNPUSb0u9FP-Aupohg6Xt3ZeVHJ8asHgXIoMeQMNd8uCXxM1Va2Cqvx2UwAnKMTRkoXaUF8KrEMZsRDfBdjxEBQ49Btd18vl85-rwPV_XENq8KvsFDxwCFcXhQ23M_1XziuI51uI3hZxPOyqeSeusd4jf1nhLgwftfDZtKKbDVgqa8z6eY11K452RpkVqpPMs-GUcYQI9ycKDwkzIPCp6LfmJDBfiJRzYlXi8hf63q-o7SJJ-o');">
+                                </div>
+                            </div>
+                            <h3
+                                class="text-white font-bold text-lg mb-1 group-hover:text-neon-yellow transition-colors">
+                                ASTEROID BELT</h3>
+                        </div>
+                        <div
+                            class="group relative overflow-hidden rounded-xl border border-primary/30 bg-background-dark/50 p-4 hover:border-primary transition-colors cursor-pointer">
+                            <div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                            </div>
+                            <div class="relative h-40 rounded-lg bg-black mb-4 overflow-hidden border border-white/10">
+                                <div class="w-full h-full bg-cover bg-center opacity-70 group-hover:scale-110 transition-transform duration-700"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDNNtZmTx94pHQ8N5U6PvekadVr27WRn54N0-vIH-z5Pz4gPQ5WpZTjAOXkAU2wr2PyDtQ30mDvPKihdOYVAakN93Qt4XZJW-UCumLp-fKMswlwlnStTHAoOhAIUsXmVgBG9oa2ji1G2dn9WrbJMzjAct43ulvoFmgHYkYWycUh11JbsaFv9Jeo84EwL_ZABWOZbfghGSAh7hk6kex5TskVy0Wd56MIA10n8Uk2kWwyTrhXZA5YybhMhCS6ep378kv6U7J5fgFV9Ms');">
+                                </div>
+                            </div>
+                            <h3 class="text-white font-bold text-lg mb-1 group-hover:text-primary transition-colors">
+                                MOTHERSHIP</h3>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer
+                class="relative z-10 w-full border-t border-primary/20 bg-background-dark/90 backdrop-blur-lg mt-auto">
+                <div class="container mx-auto px-6 py-8">
+                    <p class="text-xs text-center text-white/40">© 1985 RETRO STRIKE ARCADE</p>
+                </div>
+            </footer>
+        </section>
+
+        <!-- View: Cabinet -->
+        <section id="view-cabinet"
+            class="view-section min-h-full w-full flex flex-col bg-cabinet-dark items-center justify-center p-4 md:py-10 hidden">
+            <!-- Ambient Room Glow -->
+            <div
+                class="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,_#4a1d36_0%,_#0a0508_70%)] pointer-events-none z-0">
+            </div>
+            <div class="relative z-10 flex flex-col items-center justify-center w-full max-w-[900px]">
+                <!-- ARCADE CABINET STRUCTURE -->
+                <main class="w-full flex flex-col perspective-[1000px]">
+                    <!-- 1. MARQUEE (Top Header) -->
+                    <div
+                        class="relative h-40 w-full bg-black rounded-t-2xl border-x-[12px] border-t-[12px] border-gray-900 shadow-[0_0_60px_rgba(249,31,177,0.4)] z-20 overflow-hidden group">
+                        <div class="absolute inset-0 bg-primary/20 blur-xl"></div>
+                        <div
+                            class="absolute inset-0 flex items-center justify-between px-8 bg-gradient-to-r from-black/80 via-transparent to-black/80">
+                            <div class="hidden md:grid grid-cols-4 gap-1 w-12 h-24 opacity-50">
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                            </div>
+                            <div class="flex-1 flex justify-center items-center h-full relative">
+                                <div class="absolute inset-0 bg-primary/30 blur-md rounded-full"></div>
+                                <img class="relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] object-contain h-20"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBayqAFCMlBPkmcSvm0mlJbuRHCdXp45cIw_RUalC_QILtqdVfzzHHlrxvf6b4NoWM_tnbZ7dCXy9KW-vnkP_XM3aDnZVbhjlqOgfgf5G8lJeGsOU-tGtmGxJHLpVZXsmfE4Gu3zL7AG-1CmDeGlcxvYvQ4sEQxRHybPiKwLFRbsksfQi31QDEAlvAbwmS5oFcCEdMceKenKVZF0MV1sFaZ_PAREGlzZ2HwPA2jrt1xweknTuBuJRUuO0AjtbXhW2k2cmlMHtMHcEs" />
+                            </div>
+                            <!-- Speaker Right -->
+                            <div class="hidden md:grid grid-cols-4 gap-1 w-12 h-24 opacity-50">
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 2. CRT SCREEN (Main Viewport) -->
+                    <div
+                        class="relative bg-gray-900 border-x-[16px] border-gray-900 p-4 md:p-8 z-10 shadow-[inset_0_0_50px_rgba(0,0,0,0.8)]">
+                        <div
+                            class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-felt.png')] opacity-30 pointer-events-none">
+                        </div>
+                        <div
+                            class="relative bg-black rounded-[2rem] overflow-hidden shadow-[0_0_0_8px_#111,inset_0_0_20px_rgba(0,0,0,1)] border-4 border-gray-800 aspect-video flex flex-col">
+                            <div class="absolute inset-0 pointer-events-none z-30 bg-scanlines opacity-20"></div>
+                            <div
+                                class="absolute inset-0 pointer-events-none z-30 bg-gradient-to-br from-white/5 to-transparent rounded-[2rem]">
+                            </div>
+                            <!-- Screen Content (Game Canvas) -->
+                            <div class="relative w-full h-full flex flex-col crt-flicker overflow-hidden bg-black">
+                                <canvas id="game-canvas" class="absolute inset-0 w-full h-full block z-10"></canvas>
+
+                                <!-- Game UI Overlay -->
+                                <div id="game-ui-layer"
+                                    class="absolute inset-0 z-20 flex flex-col justify-between p-4 pointer-events-none">
+                                    <div
+                                        class="flex justify-between items-start font-mono text-white text-lg md:text-xl drop-shadow-[2px_2px_0_#f91fb1]">
+                                        <div>SCORE: <span id="ui-score">00000</span></div>
+                                        <div class="animate-pulse text-red-500">HI: <span id="ui-hiscore">10000</span>
+                                        </div>
+                                    </div>
+                                    <div id="ui-lives" class="flex gap-2 text-primary">
+                                        <span class="material-symbols-outlined">rocket_launch</span>
+                                        <span class="material-symbols-outlined">rocket_launch</span>
+                                        <span class="material-symbols-outlined">rocket_launch</span>
+                                    </div>
+                                </div>
+
+                                <!-- Start Screen Overlay -->
+                                <div id="game-start-screen"
+                                    class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-500">
+                                    <h1 class="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 italic tracking-tighter mb-4 glitch-text"
+                                        data-text="READY?">READY?</h1>
+                                    <p class="text-primary font-mono text-lg animate-pulse mb-8 tracking-widest">PRESS
+                                        START TO PLAY</p>
+                                    <button onclick="startGame()"
+                                        class="pulse-btn bg-primary text-white font-bold text-xl px-8 py-3 rounded-full border-b-4 border-[#a01673] active:border-b-0 active:translate-y-1 transition-all hover:scale-110 pointer-events-auto">
+                                        START GAME
+                                    </button>
+                                    <p class="text-gray-500 text-xs mt-8 font-mono">ARROWS to Move • SPACE / BUTTON to
+                                        Shoot</p>
+                                </div>
+
+                                <!-- Game Over Overlay -->
+                                <div id="game-over-screen"
+                                    class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 hidden pointer-events-auto">
+                                    <h1 class="text-6xl md:text-7xl font-black text-red-500 italic tracking-tighter mb-2 glitch-text"
+                                        data-text="GAME OVER">GAME OVER</h1>
+                                    <p class="text-white font-mono text-xl mb-6">SCORE: <span id="final-score">0</span>
+                                    </p>
+                                    <button onclick="resetGame()"
+                                        class="text-white border-2 border-white/50 px-6 py-2 rounded uppercase font-bold hover:bg-white hover:text-black transition-colors pointer-events-auto">
+                                        TRY AGAIN
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <!-- 3. CONTROL PANEL -->
+            <div
+                class="relative bg-carbon border-x-[16px] border-b-[16px] border-gray-900 rounded-b-lg p-6 md:p-10 z-20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                <!-- Glossy Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none">
+                </div>
+                <!-- Reflection -->
+                <div
+                    class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/20 to-transparent pointer-events-none blur-xl">
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                    <!-- Joystick -->
+                    <div id="arcade-joystick"
+                        class="flex flex-col items-center gap-2 group cursor-pointer w-1/3 active:scale-95 transition-transform">
+                        <div class="relative w-24 h-24 flex items-center justify-center">
+                            <div
+                                class="absolute w-20 h-20 bg-gray-800 rounded-full border-4 border-gray-700 shadow-inner">
+                            </div>
+                            <div class="absolute w-12 h-12 bg-black rounded-full opacity-80"></div>
+                            <div
+                                class="absolute h-12 w-3 bg-gray-400 rounded-full -mt-4 transform origin-bottom transition-transform group-hover:rotate-12">
+                            </div>
+                            <div
+                                class="absolute w-10 h-10 bg-red-600 rounded-full -mt-16 shadow-[inset_-2px_-4px_6px_rgba(0,0,0,0.5),2px_2px_5px_rgba(0,0,0,0.5)] transform transition-transform group-hover:translate-x-2 group-hover:-rotate-12 z-10">
+                                <div class="absolute top-2 right-2 w-3 h-3 bg-white/30 rounded-full blur-[1px]"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Buttons -->
+                    <div class="flex justify-center gap-6 w-full md:w-auto">
+                        <div class="flex flex-col items-center gap-2">
+                            <button
+                                class="game-btn arcade-btn w-14 h-14 md:w-16 md:h-16 rounded-full bg-yellow-400 border-4 border-yellow-600 shadow-button active:shadow-button-pressed relative overflow-hidden group/btn"></button>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Fire</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 mt-6 md:mt-8">
+                            <button
+                                class="game-btn arcade-btn w-14 h-14 md:w-16 md:h-16 rounded-full bg-blue-500 border-4 border-blue-700 shadow-button active:shadow-button-pressed relative overflow-hidden"></button>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Bomb</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <button
+                                class="game-btn arcade-btn w-14 h-14 md:w-16 md:h-16 rounded-full bg-green-500 border-4 border-green-700 shadow-button active:shadow-button-pressed relative overflow-hidden"></button>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Dash</span>
+                        </div>
+                    </div>
+                    <!-- Play Now (Big Fire Button) -->
+                    <div class="flex flex-col items-center gap-2 w-1/3">
+                        <button id="big-red-btn" onclick="startGame()"
+                            class="game-btn arcade-btn relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-primary border-[6px] border-[#a01673] shadow-button active:shadow-button-pressed flex items-center justify-center overflow-hidden">
+                            <span
+                                class="relative z-10 text-white font-black text-lg md:text-xl leading-none text-center shadow-black drop-shadow-md">FIRE</span>
+                        </button>
+                        <span
+                            class="text-xs text-primary font-bold uppercase tracking-widest mt-2 animate-pulse">Attack</span>
+                    </div>
+                </div>
+            </div>
+            </main>
+    </div>
+    </section>
+
+    <!-- View: Levels -->
+    <section id="view-levels"
+        class="view-section min-h-full w-full flex flex-col bg-background-light dark:bg-background-dark hidden">
+        <!-- Background Grid Effect -->
+        <div class="absolute inset-0 z-0 opacity-10 pointer-events-none"
+            style="background-size: 40px 40px; background-image: linear-gradient(to right, #f91fb1 1px, transparent 1px), linear-gradient(to bottom, #f91fb1 1px, transparent 1px);">
+        </div>
+        <!-- Floating Geometric Shapes -->
+        <div
+            class="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary blur-[80px] opacity-20 pointer-events-none">
+        </div>
+        <div
+            class="absolute bottom-40 right-10 w-64 h-64 rounded-full bg-purple-600 blur-[100px] opacity-20 pointer-events-none">
+        </div>
+        <div class="layout-container flex h-full grow flex-col z-10 relative">
+            <!-- Navigation Header (Duplicate removed/adapted) -->
+            <div class="px-5 md:px-40 flex justify-center pt-5">
+                <div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+                    <header
+                        class="flex flex-wrap items-center justify-between whitespace-nowrap border-b border-solid border-b-[#4a213c] px-4 md:px-10 py-3 bg-arcade-black/50 backdrop-blur-md rounded-t-xl">
+                        <div class="flex items-center gap-4 text-white">
+                            <div class="size-8 text-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined !text-3xl text-glow">stadia_controller</span>
+                            </div>
+                            <h2 class="text-white text-xl font-bold leading-tight tracking-wider text-glow">NEON
+                                ARCADE</h2>
+                        </div>
+                    </header>
+                </div>
+            </div>
+            <!-- Page Heading -->
+            <div class="px-5 md:px-40 flex flex-1 justify-center py-5">
+                <div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+                    <div class="flex flex-wrap justify-between items-end gap-3 px-4 py-6">
+                        <div class="flex min-w-72 flex-col gap-2">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-primary animate-pulse">arrow_right</span>
+                                <p class="text-[#cc8eb8] text-sm font-bold tracking-[0.2em] uppercase">Current
+                                    Level: Main Menu</p>
+                            </div>
+                            <h1
+                                class="text-white text-5xl md:text-6xl font-black leading-tight tracking-tighter text-glow uppercase italic">
+                                Select Your Stage</h1>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white/50 text-xs font-mono tracking-widest">CREDITS: 02</span>
+                        </div>
+                    </div>
+                    <!-- Feature Cards (Stages) -->
+                    <div class="flex flex-col gap-10 px-4 py-6 @container">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <!-- Card 1 -->
+                            <div
+                                class="group relative flex flex-col gap-0 rounded-xl overflow-hidden bg-arcade-black border-2 border-[#4a213c] hover:border-primary hover:scale-[1.02] transition-all duration-300 shadow-xl cursor-pointer">
+                                <div
+                                    class="p-4 pb-0 bg-arcade-black flex justify-between items-center border-b border-[#4a213c] group-hover:border-primary/50">
+                                    <span class="text-xs font-mono text-[#cc8eb8]">STAGE 01</span>
+                                    <div class="flex gap-1">
+                                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                        <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                        <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                    </div>
+                                </div>
+                                <div class="relative bg-arcade-screen h-64 w-full">
+                                    <div class="absolute inset-0 z-0 bg-center bg-no-repeat bg-cover opacity-80 mix-blend-overlay group-hover:opacity-100 transition-opacity"
+                                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCIQIhxHdnNuPW24MF0sWGFbpjafdZM1doTSF1ttcn1iJFhIrh6-fsEKux9aUBC7a9sCqX_jqaKBbKmGbD25ZCEStKQ5yI_bR_ALfPpLBavMidGoAwzVS_LSgIJmdbMFTzWuUGPNmQJigYNKtB41mI2vjonun0gIADmcdGkc4UWGyJuCQEyCbsT2Z4nYy0pXwRLcZmOgZUyhqAzWXUpVaKcLBCsLDvHuE-huK-qBcEXEw9oHyKTKFwfQAr-Qrc9Xf8tL7R2IyTgv1g");'>
+                                    </div>
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-arcade-black via-transparent to-transparent opacity-90">
+                                    </div>
+                                    <div class="absolute inset-0 scanlines opacity-30 z-10"></div>
+                                    <div class="absolute bottom-0 left-0 w-full p-6 z-20 flex flex-col gap-2">
+                                        <h3
+                                            class="text-white text-2xl font-bold leading-tight uppercase group-hover:text-primary transition-colors text-shadow-sm">
+                                            Insane Power-ups</h3>
+                                        <p class="text-[#cc8eb8] text-sm font-medium leading-normal line-clamp-2">
+                                            Collect glitched artifacts to break the game logic and dominate.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Card 2 -->
+                            <div
+                                class="group relative flex flex-col gap-0 rounded-xl overflow-hidden bg-arcade-black border-2 border-primary scale-105 shadow-[0_0_30px_rgba(249,31,177,0.2)] cursor-pointer z-10">
+                                <div
+                                    class="p-4 pb-0 bg-arcade-black flex justify-between items-center border-b border-primary/50">
+                                    <span class="text-xs font-mono text-primary animate-pulse">STAGE 02 //
+                                        READY</span>
+                                    <div class="flex gap-1">
+                                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                        <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <div class="relative bg-arcade-screen h-72 w-full">
+                                    <div class="absolute inset-0 z-0 bg-center bg-no-repeat bg-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDzq6HHqJHsdjnyOgy-j_Z__ZdGQ1lIXI5yUUljW2jcZoTOm72o8ghD4pxEypUR4tM8l0K0FkaWbyoAuemD16650hZ2wI_FBo5CRjKGm9-fKt7xELZbCgXkgBVWhJx7Qx9FHZHwGHj6nvJK00RrN-HfHmFdbWIOFXseUHtS_8Cz17VcYD4tWcZjyDZE8S4S4oZlVFPGc0Rbg_3ilsX_QISsLsbmfrckL6bpCTKwqzA5O9k7FfPPtPqPTnR8oXh0MUEx6Mil8dFxBYo");'>
+                                    </div>
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-arcade-black via-transparent to-transparent opacity-90">
+                                    </div>
+                                    <div class="absolute inset-0 scanlines opacity-40 z-10"></div>
+                                    <div class="absolute bottom-0 left-0 w-full p-6 z-20 flex flex-col gap-2">
+                                        <h3 class="text-white text-3xl font-black leading-tight uppercase text-glow">
+                                            Co-op Mayhem</h3>
+                                        <p class="text-white text-sm font-medium leading-normal">Drop-in/Drop-out
+                                            multiplayer chaos with up to 4 friends.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Card 3 -->
+                            <div
+                                class="group relative flex flex-col gap-0 rounded-xl overflow-hidden bg-arcade-black border-2 border-[#4a213c] hover:border-primary hover:scale-[1.02] transition-all duration-300 shadow-xl cursor-pointer">
+                                <div class="relative bg-arcade-screen h-64 w-full">
+                                    <div class="absolute inset-0 z-0 bg-center bg-no-repeat bg-cover opacity-80 mix-blend-overlay group-hover:opacity-100 transition-opacity"
+                                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDypp4GmXAJ2-9RqrI2vSeI-3fs9zs9dEhddlPwGh_ZcuHRoAgZdOlF8-h7l25yZFsCEuiH_quJZZy62pZwsYH0TYO80mouVIVdF9hkvwaHBuX8N0W0o-Trhr5VGcZncOEtIdGtvJRTCRuTLOZ8lwvN_NKioidnY0-65ia2C8pDFhSaWrofLy6rjfluks4ce7hN-CAo2KaznUxCHF0GzE_VcP9i-sl-F8jAvBu810Z3f-2b1pk1U2oF2bg698W4keiRamg_zCjS3eE");'>
+                                    </div>
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-arcade-black via-transparent to-transparent opacity-90">
+                                    </div>
+                                    <div class="absolute inset-0 scanlines opacity-30 z-10"></div>
+                                    <div class="absolute bottom-0 left-0 w-full p-6 z-20 flex flex-col gap-2">
+                                        <h3
+                                            class="text-white text-2xl font-bold leading-tight uppercase group-hover:text-primary transition-colors text-shadow-sm">
+                                            Infinite Levels</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- View: Shop -->
+    <section id="view-shop"
+        class="view-section min-h-full w-full flex flex-col bg-background-light dark:bg-background-dark hidden">
+        <!-- Top Navigation / HUD (Local to Shop) -->
+        <header
+            class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-[#4a213c] bg-background-dark/95 backdrop-blur-sm px-6 py-4 lg:px-10">
+            <div class="flex items-center gap-4 text-white">
+                <div
+                    class="flex items-center justify-center size-10 rounded-full bg-surface-dark border border-[#4a213c]">
+                    <span class="material-symbols-outlined text-primary">stadia_controller</span>
+                </div>
+                <div>
+                    <h2 class="text-white text-lg font-bold leading-tight tracking-wider">GAME SYSTEM <span
+                            class="text-primary">v2.0</span></h2>
+                    <p class="text-xs text-[#cc8eb8] tracking-widest">ONLINE // CONNECTED</p>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-3">
+                <div
+                    class="flex items-center justify-center h-10 px-4 bg-surface-dark rounded-full border border-[#4a213c]">
+                    <span class="text-[#cc8eb8] text-xs font-bold mr-2">CREDITS:</span>
+                    <span class="text-accent-green text-sm font-bold tracking-widest">50,420</span>
+                </div>
+                <button
+                    class="flex size-10 items-center justify-center rounded-full bg-primary hover:bg-white hover:text-primary transition-colors text-white">
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                </button>
+                <button
+                    class="flex size-10 items-center justify-center rounded-full bg-surface-dark hover:bg-[#4a213c] transition-colors text-white border border-[#4a213c]">
+                    <span class="material-symbols-outlined">person</span>
+                </button>
+            </div>
+        </header>
+        <div class="flex flex-1 flex-col lg:flex-row max-w-[1440px] mx-auto w-full p-4 lg:p-8 gap-6">
+            <!-- Left Content: Grid Area -->
+            <main class="flex-1 flex flex-col gap-6">
+                <!-- Page Heading -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-2">
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-black leading-tight tracking-tighter mb-2">UPGRADE
+                            <span
+                                class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">TERMINAL</span>
+                        </h1>
+                        <p class="text-[#cc8eb8] text-base md:text-lg">Equip your engine with next-gen features.</p>
+                    </div>
+                    <!-- Filter Tabs -->
+                    <div class="flex bg-surface-dark p-1 rounded-full border border-[#4a213c]">
+                        <button
+                            class="px-5 py-2 rounded-full bg-primary text-white text-sm font-bold shadow-lg shadow-primary/25">ALL</button>
+                        <button
+                            class="px-5 py-2 rounded-full text-[#cc8eb8] hover:text-white hover:bg-white/5 text-sm font-bold transition-colors">WEAPONS</button>
+                        <button
+                            class="px-5 py-2 rounded-full text-[#cc8eb8] hover:text-white hover:bg-white/5 text-sm font-bold transition-colors">LEVELS</button>
+                        <button
+                            class="px-5 py-2 rounded-full text-[#cc8eb8] hover:text-white hover:bg-white/5 text-sm font-bold transition-colors">TECH</button>
+                    </div>
+                </div>
+                <!-- Features Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+                    <!-- Card 1 -->
+                    <div
+                        class="group glow-hover flex flex-col bg-surface-dark border border-[#4a213c] rounded-xl overflow-hidden relative">
+                        <div
+                            class="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur text-xs font-bold px-2 py-1 rounded text-white border border-white/10">
+                            LVL 5 REQ</div>
+                        <div class="h-48 w-full bg-cover bg-center"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBrVcfxp5pzvmgoXnaV9PYNmRmi9TdxCQI8VHN1GAwZTW6phPpwlbvOEWSJs-wN_TWRyF2HmgE0GKoTlF7DINDBltA1OLsqfo6m3HwlrxyoXuuuvjyBBKkjbxYo6EJLlhRBxzY0-nNwHpOrPoo5CCgh9zfZWObp74X0xoWPmdSg7NypG3diu1mSvFiCi81Ncr6WYAdzB6Yimg6GkUr3WXVzwfgwXaxrP8NyT2GGf9-V9k3DE1bNKYmHmjYFRYw2LfvDTanSvp9zJU4');">
+                            <div class="absolute inset-0 bg-gradient-to-t from-surface-dark to-transparent"></div>
+                        </div>
+                        <div class="p-5 flex flex-col gap-3 flex-1">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-xl font-bold text-white mb-1">Neural Net AI</h3>
+                                    <p class="text-[#cc8eb8] text-sm">Advanced adaptive enemy behavior v4.0</p>
+                                </div>
+                                <span class="material-symbols-outlined text-primary text-3xl">psychology</span>
+                            </div>
+                            <div class="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
+                                <div class="flex items-center gap-1 text-accent-orange text-xs font-bold"><span
+                                        class="material-symbols-outlined text-[16px]">bolt</span> HIGH CPU LOAD
+                                </div>
+                                <button
+                                    class="bg-primary hover:bg-white hover:text-black text-white px-6 py-2 rounded-full text-sm font-bold transition-colors uppercase tracking-wide">Equip</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div
+                        class="group glow-hover flex flex-col bg-surface-dark border border-[#4a213c] rounded-xl overflow-hidden relative">
+                        <div class="h-48 w-full bg-cover bg-center"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAGbwpRZkioEZIiYxJQecHJNi5Xhbw2Lul0cqN075jtJkG0dcmVcEAWgJtitcM2y5olvtntRla2Ibm4EwHaLVF3jcPT01f_r788ipPiGoLBeh8H8jfbDv45hpxhmJu9W8Nm2zh42ASdRHYaRWEAfzZ8JAGGsJW_eoYZmYVmMm_hioyb4Jk_jHbSsSke7iQWvYKPB8d8wkqf0XtvFuZTQL2UN3oXaqBVK5CCRMK5qmrdnzMBXkbjVZ2JWOGBWHWKkD5OaT_ZHH_u3eI');">
+                            <div class="absolute inset-0 bg-gradient-to-t from-surface-dark to-transparent"></div>
+                        </div>
+                        <div class="p-5 flex flex-col gap-3 flex-1">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-xl font-bold text-white mb-1">Photon Ray Tracing</h3>
+                                    <p class="text-[#cc8eb8] text-sm">Real-time global illumination engine.</p>
+                                </div>
+                                <span class="material-symbols-outlined text-accent-green text-3xl">light_mode</span>
+                            </div>
+                            <div class="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
+                                <div class="flex items-center gap-1 text-accent-green text-xs font-bold"><span
+                                        class="material-symbols-outlined text-[16px]">check_circle</span> UNLOCKED
+                                </div>
+                                <button
+                                    class="bg-surface-darker border border-primary text-primary hover:bg-primary hover:text-white px-6 py-2 rounded-full text-sm font-bold transition-colors uppercase tracking-wide">Enable</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <!-- Right Content: Stats Side Panel -->
+            <aside class="w-full lg:w-96 flex flex-col gap-6 shrink-0">
+                <div
+                    class="bg-surface-dark border border-[#4a213c] rounded-xl p-6 sticky top-28 shadow-2xl shadow-black/50">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="size-16 rounded-full p-1 bg-gradient-to-br from-primary to-accent-orange">
+                            <div class="size-full rounded-full bg-black overflow-hidden relative">
+                                <img alt="Pixel art avatar"
+                                    class="object-cover w-full h-full opacity-90 hover:scale-110 transition-transform"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgdBM4sF-9Qiek1oGMLEPV8dzMCtFft7HPzwLLdWbeC4JKBT5HAOQHHGXcfH0grtIQUD_Vqsda7NcwnKDLHPPfqt2rWMO2C5XUXpYma10aKeOs-77tRKmlJHA7ZguVP8CIgNfo8-grn2F-YjA9Yl1QuWsDWE6dss53_SV0x65bl1lAf0aEa2si8mlPdoOGtkP3MLh6LtSGsZ0jwRIahGvlV36ddUJTGxJpuTh8pKd_N4pLtwARSA9XYXRtOKlsXi5VE0LbK76A08Y" />
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-white text-xl font-bold uppercase">Player One</h3>
+                            <div class="flex items-center gap-2 mt-1"><span
+                                    class="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-bold border border-primary/30">LVL
+                                    42</span></div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-2"><span
+                                class="text-white font-bold tracking-widest text-sm">STATS ANALYTICS</span><span
+                                class="material-symbols-outlined text-[#cc8eb8]">bar_chart</span></div>
+                        <div>
+                            <div class="flex justify-between mb-2"><span
+                                    class="text-[#cc8eb8] text-sm font-bold">DIFFICULTY</span><span
+                                    class="text-accent-orange text-sm font-bold">HARDCORE</span></div>
+                            <div
+                                class="h-4 w-full bg-surface-darker rounded-full overflow-hidden border border-white/5">
+                                <div
+                                    class="h-full bg-accent-orange w-[85%] rounded-full shadow-[0_0_10px_rgba(255,158,0,0.5)]">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    </div>
+
+    <script>
+        function switchView(viewId) {
+            // Update Content
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+
+            // Update Nav
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('btn-' + viewId).classList.add('active');
+
+            // Reset scroll
+            document.getElementById('app-container').scrollTop = 0;
+        }
+
+        // Initialize
+        switchView('landing');
+    </script>
+
+    <script>
+        // --- ARCADE GAME LOGIC ---
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game State
+        let gameLoopId;
+        let gameActive = false;
+        let frameCount = 0;
+        let score = 0;
+        let lives = 3;
+        let highScore = 10000;
+
+        // Inputs
+        const keys = { ArrowLeft: false, ArrowRight: false, Space: false };
+        const touchInput = { left: false, right: false, fire: false };
+
+        // Entities
+        let player = { x: 0, y: 0, width: 30, height: 20, speed: 5, color: '#00ff00', dx: 0 };
+        let bullets = [];
+        let enemies = [];
+        let particles = [];
+
+        // Constants
+        const ENEMY_ROWS = 4;
+        const ENEMY_COLS = 8;
+        const ENEMY_SIZE = 25;
+        const ENEMY_PAD = 15;
+        const BULLET_SPEED = 7;
+
+        // Resize Canvas
+        function resizeCanvas() {
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
+            if (player.y === 0) player.y = canvas.height - 40; // Init position
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Input Handling ---
+        window.addEventListener('keydown', e => {
+            if (e.code === 'ArrowLeft') keys.ArrowLeft = true;
+            if (e.code === 'ArrowRight') keys.ArrowRight = true;
+            if (e.code === 'Space') {
+                keys.Space = true;
+                if (gameActive) fireBullet();
+            }
+        });
+        window.addEventListener('keyup', e => {
+            if (e.code === 'ArrowLeft') keys.ArrowLeft = false;
+            if (e.code === 'ArrowRight') keys.ArrowRight = false;
+            if (e.code === 'Space') keys.Space = false;
+        });
+
+        // Virtual Controls Binding
+        const joystick = document.getElementById('arcade-joystick');
+        const buttons = document.querySelectorAll('.game-btn');
+
+        // Joystick Touch/Click
+        function handleJoy(e) {
+            e.preventDefault();
+            const rect = joystick.getBoundingClientRect();
+            // Determine click position relative to center
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const centerX = rect.left + rect.width / 2;
+
+            if (clientX < centerX - 10) {
+                touchInput.left = true;
+                touchInput.right = false;
+                joystick.querySelector('.bg-gray-400').style.transform = 'rotate(-15deg)';
+            } else if (clientX > centerX + 10) {
+                touchInput.right = true;
+                touchInput.left = false;
+                joystick.querySelector('.bg-gray-400').style.transform = 'rotate(15deg)';
+            } else {
+                touchInput.left = false;
+                touchInput.right = false;
+                joystick.querySelector('.bg-gray-400').style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function resetJoy() {
+            touchInput.left = false;
+            touchInput.right = false;
+            joystick.querySelector('.bg-gray-400').style.transform = 'rotate(0deg)';
+        }
+
+        joystick.addEventListener('mousedown', handleJoy);
+        joystick.addEventListener('mousemove', (e) => { if (e.buttons === 1) handleJoy(e); });
+        joystick.addEventListener('mouseup', resetJoy);
+        joystick.addEventListener('touchstart', handleJoy); // Mobile
+        joystick.addEventListener('touchend', resetJoy);
+
+        // Buttons
+        buttons.forEach(btn => {
+            const fire = (e) => {
+                e.preventDefault();
+                if (!gameActive) startGame(); // Clicking button starts game if not running
+                else fireBullet();
+                // Button visual feedback handled by CSS active state
+            };
+            btn.addEventListener('mousedown', fire);
+            btn.addEventListener('touchstart', fire);
+        });
+
+        // --- Game Functions ---
+
+        function initEntities() {
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - 50;
+
+            bullets = [];
+            enemies = [];
+            particles = [];
+
+            // Spawn Enemies
+            const startX = (canvas.width - (ENEMY_COLS * (ENEMY_SIZE + ENEMY_PAD))) / 2;
+            for (let r = 0; r < ENEMY_ROWS; r++) {
+                for (let c = 0; c < ENEMY_COLS; c++) {
+                    enemies.push({
+                        x: startX + c * (ENEMY_SIZE + ENEMY_PAD),
+                        y: 50 + r * (ENEMY_SIZE + ENEMY_PAD),
+                        w: ENEMY_SIZE,
+                        h: ENEMY_SIZE,
+                        row: r,
+                        active: true,
+                        color: r === 0 ? '#ff0055' : r === 1 ? '#ffee00' : '#00ff9d'
+                    });
+                }
+            }
+        }
+
+        function fireBullet() {
+            // Simple cooldown or limit
+            if (bullets.filter(b => b.dy < 0).length < 3) { // Max 3 player bullets
+                bullets.push({
+                    x: player.x + player.width / 2 - 2,
+                    y: player.y,
+                    w: 4,
+                    h: 10,
+                    color: '#fff',
+                    dy: -BULLET_SPEED
+                });
+                // Sound effect could go here
+            }
+        }
+
+        function spawnEnemyBullet() {
+            // Find bottom-most enemies
+            const activeEnemies = enemies.filter(e => e.active);
+            if (activeEnemies.length === 0) return; // Win?
+
+            const shooter = activeEnemies[Math.floor(Math.random() * activeEnemies.length)];
+            bullets.push({
+                x: shooter.x + shooter.w / 2,
+                y: shooter.y + shooter.h,
+                w: 4,
+                h: 8,
+                color: '#ff0055',
+                dy: BULLET_SPEED * 0.6 // Slower enemy bullets
+            });
+        }
+
+        function update() {
+            // Player Move
+            if (keys.ArrowLeft || touchInput.left) player.x -= player.speed;
+            if (keys.ArrowRight || touchInput.right) player.x += player.speed;
+
+            // Clamp Player
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Bullets
+            bullets.forEach((b, i) => {
+                b.y += b.dy;
+
+                // Hit Enemy
+                if (b.dy < 0) { // Player bullet
+                    enemies.forEach(e => {
+                        if (e.active &&
+                            b.x < e.x + e.w &&
+                            b.x + b.w > e.x &&
+                            b.y < e.y + e.h &&
+                            b.y + b.h > e.y) {
+                            e.active = false;
+                            bullets.splice(i, 1);
+                            score += (4 - e.row) * 10;
+                            createParticles(e.x + e.w / 2, e.y + e.h / 2, e.color);
+                            updateUI();
+                            // Check Win
+                            if (enemies.filter(en => en.active).length === 0) {
+                                respawnEnemies(); // Infinite levels
+                            }
+                        }
+                    });
+                }
+                // Hit Player
+                else { // Enemy bullet
+                    if (b.x < player.x + player.width &&
+                        b.x + b.w > player.x &&
+                        b.y < player.y + player.height &&
+                        b.y + b.h > player.y) {
+                        playerHit();
+                        bullets.splice(i, 1);
+                    }
+                }
+            });
+
+            // Remove off-screen bullets
+            bullets = bullets.filter(b => b.y > 0 && b.y < canvas.height);
+
+            // Enemy Movement (Simple patrol)
+            const activeEnemies = enemies.filter(e => e.active);
+            if (activeEnemies.length > 0) {
+                const time = Date.now() / 1000;
+                const shift = Math.sin(time) * 2; // Wobbly movement
+                activeEnemies.forEach(e => {
+                    e.x += shift;
+                });
+
+                // Random shooting
+                if (Math.random() < 0.02) spawnEnemyBullet();
+            }
+
+            // Particles
+            particles.forEach((p, i) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.05;
+                if (p.life <= 0) particles.splice(i, 1);
+            });
+        }
+
+        function respawnEnemies() {
+            // Make them faster or lower? For now just reset
+            initEntities();
+            // Keep score
+        }
+
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    life: 1,
+                    color: color
+                });
+            }
+        }
+
+        function playerHit() {
+            lives--;
+            updateUI();
+            createParticles(player.x + player.width / 2, player.y + player.height / 2, '#fff');
+            // Shake screen?
+            if (lives <= 0) gameOver();
+        }
+
+        function draw() {
+            // Clear
+            ctx.fillStyle = '#000000'; // Clear transparently or black
+            ctx.fillRect(0, 0, canvas.width, canvas.height); // Standard clear
+
+            // Draw Player
+            ctx.fillStyle = player.color;
+            // Draw simple ship shape
+            ctx.beginPath();
+            ctx.moveTo(player.x + player.width / 2, player.y);
+            ctx.lineTo(player.x + player.width, player.y + player.height);
+            ctx.lineTo(player.x, player.y + player.height);
+            ctx.fill();
+
+            // Draw Enemies
+            enemies.forEach(e => {
+                if (e.active) {
+                    ctx.fillStyle = e.color;
+                    // Draw invader shape (pixel art style rect)
+                    ctx.fillRect(e.x, e.y, e.w, e.h);
+                    // Eyes
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(e.x + 5, e.y + 8, 4, 4);
+                    ctx.fillRect(e.x + e.w - 9, e.y + 8, 4, 4);
+                }
+            });
+
+            // Draw Bullets
+            bullets.forEach(b => {
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+            });
+
+            // Draw Particles
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, 3, 3);
+                ctx.globalAlpha = 1;
+            });
+        }
+
+        function loop() {
+            if (!gameActive) return;
+            update();
+            draw();
+            gameLoopId = requestAnimationFrame(loop);
+        }
+
+        function startGame() {
+            console.log("Starting Game...");
+            document.getElementById('game-start-screen').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('game-over-screen').classList.add('hidden');
+
+            resizeCanvas();
+            gameActive = true;
+            score = 0;
+            lives = 3;
+            updateUI();
+            initEntities();
+            loop();
+
+            // Switch to cabinet view if not already (in case called from elsewhere)
+            switchView('cabinet');
+        }
+
+        function gameOver() {
+            gameActive = false;
+            cancelAnimationFrame(gameLoopId);
+            document.getElementById('game-over-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            if (score > highScore) {
+                highScore = score;
+                document.getElementById('ui-hiscore').innerText = highScore;
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('game-over-screen').classList.add('hidden');
+            startGame();
+        }
+
+        function updateUI() {
+            document.getElementById('ui-score').innerText = score.toString().padStart(5, '0');
+            // Lives
+            const livesContainer = document.getElementById('ui-lives');
+            for (let i = 0; i < lives; i++) {
+                livesContainer.innerHTML += '<span class="material-symbols-outlined">rocket_launch</span>';
+            }
+        }
+
+        // --- INTERACTIVE UI LOGIC ---
+        function setupInteractiveUI() {
+            // --- SHOP INTERACTIVITY ---
+            const shopContainer = document.getElementById('view-shop');
+            if (shopContainer) {
+                const tabs = shopContainer.querySelectorAll('button');
+                tabs.forEach(btn => {
+                    const text = btn.innerText.trim();
+
+                    // Filter Tabs
+                    if (['ALL', 'WEAPONS', 'LEVELS', 'TECH'].includes(text)) {
+                        btn.addEventListener('click', () => {
+                            // Reset all tabs
+                            tabs.forEach(b => {
+                                if (['ALL', 'WEAPONS', 'LEVELS', 'TECH'].includes(b.innerText.trim())) {
+                                    b.className = 'px-5 py-2 rounded-full text-[#cc8eb8] hover:text-white hover:bg-white/5 text-sm font-bold transition-colors';
+                                }
+                            });
+                            // Set Active
+                            btn.className = 'px-5 py-2 rounded-full bg-primary text-white text-sm font-bold shadow-lg shadow-primary/25 transition-transform scale-105';
+
+                            // Animate Cards (Simulated Filter)
+                            const cards = shopContainer.querySelectorAll('.group');
+                            cards.forEach(card => {
+                                card.style.opacity = '0';
+                                setTimeout(() => card.style.opacity = '1', 200 + Math.random() * 200);
+                            });
+                        });
+                    }
+
+                    // Equip/Buy Buttons
+                    if (text === 'Equip' || text === 'Enable' || text.includes('CR')) { // Includes Credits
+                        btn.addEventListener('click', function () {
+                            if (this.innerText.includes('EQUIPPED') || this.innerText.includes('ACTIVE')) {
+                                // Unequip
+                                this.innerHTML = 'Equip';
+                                this.className = 'bg-primary hover:bg-white hover:text-black text-white px-6 py-2 rounded-full text-sm font-bold transition-colors uppercase tracking-wide';
+                            } else if (this.innerText.includes('CR')) { // Buy
+                                this.innerHTML = '<span class="material-symbols-outlined text-sm mr-1">check</span> OWNED';
+                                this.className = 'bg-accent-green text-black px-6 py-2 rounded-full text-sm font-bold transition-colors uppercase tracking-wide flex items-center';
+                                // Update Credits Visual
+                                const creditsEl = shopContainer.querySelector('.text-accent-green');
+                                if (creditsEl) creditsEl.innerText = (parseInt(creditsEl.innerText.replace(',', '')) - 2500).toLocaleString();
+                            } else {
+                                // Equip
+                                this.innerHTML = '<span class="material-symbols-outlined text-sm mr-1">check_circle</span> EQUIPPED';
+                                this.className = 'bg-accent-green text-black px-6 py-2 rounded-full text-sm font-bold transition-colors uppercase tracking-wide flex items-center';
+                            }
+                        });
+                    }
+                });
+            }
+
+            // --- LEVELS INTERACTIVITY ---
+            const levelsContainer = document.getElementById('view-levels');
+            if (levelsContainer) {
+                // Level Cards Selection
+                const cards = levelsContainer.querySelectorAll('.group');
+                cards.forEach(card => {
+                    card.addEventListener('click', () => {
+                        // Reset all
+                        cards.forEach(c => {
+                            c.classList.remove('border-primary', 'scale-105', 'shadow-[0_0_30px_rgba(249,31,177,0.2)]');
+                            c.classList.add('border-[#4a213c]');
+                            const badge = c.querySelector('.animate-pulse'); // Remove "READY" text
+                            if (badge && badge.innerText.includes('READY')) badge.innerText = badge.innerText.split(' // ')[0];
+                        });
+
+                        // Set Active
+                        card.classList.remove('border-[#4a213c]');
+                        card.classList.add('border-primary', 'scale-105', 'shadow-[0_0_30px_rgba(249,31,177,0.2)]', 'transition-all');
+
+                        // Add "READY" text
+                        const stageText = card.querySelector('.font-mono');
+                        if (stageText && !stageText.innerText.includes('READY')) {
+                            stageText.innerText += ' // READY';
+                            stageText.classList.add('text-primary', 'animate-pulse');
+                            stageText.classList.remove('text-[#cc8eb8]');
+                        }
+                    });
+                });
+
+                // Hero Selection (Simple Toggle)
+                const heroContainer = levelsContainer.querySelector('.bg-black\\/20');
+                if (heroContainer) {
+                    const heroes = heroContainer.querySelectorAll('.flex-col');
+                    heroes.forEach(hero => {
+                        hero.addEventListener('click', () => {
+                            // Reset
+                            heroes.forEach(h => {
+                                h.classList.add('opacity-60');
+                                h.querySelector('.rounded-full').classList.add('grayscale', 'border-[#4a213c]');
+                                h.querySelector('.rounded-full').classList.remove('border-primary', 'shadow-[0_0_15px_rgba(249,31,177,0.6)]');
+                                const name = h.querySelector('span');
+                                if (name) name.classList.remove('text-primary');
+                            });
+
+                            // Activate
+                            hero.classList.remove('opacity-60');
+                            hero.querySelector('.rounded-full').classList.remove('grayscale', 'border-[#4a213c]');
+                            hero.querySelector('.rounded-full').classList.add('border-primary', 'shadow-[0_0_15px_rgba(249,31,177,0.6)]');
+                            const name = hero.querySelector('span');
+                            if (name) name.classList.add('text-primary');
+                        });
+                    });
+                }
+            }
+        }
+
+        // Initialize UI
+        setupInteractiveUI();
+
+        // Initial resize
+        setTimeout(resizeCanvas, 100);
+    </script>
+</body>
+
+</html>
